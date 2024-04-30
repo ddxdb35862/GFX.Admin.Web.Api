@@ -23,6 +23,14 @@ public class Startup : AppStartup
         services.AddConfigurableOptions<GameServerOptions>();
 
         var gameServerOptions = App.GetConfig<GameServerOptions>("GameServerSettings", true);
+        
+        var gameServerHostPort = Environment.GetEnvironmentVariable("GAME_SERVER_HOST_PORT");
+        if (!string.IsNullOrEmpty(gameServerHostPort))
+        {
+            Log.Information($"数据库类型:{config.DbType}连接字符串:{config.ConnectionString}");
+            
+            gameServerOptions.HttpRootUrl = $"http://{gameServerHostPort}";
+        }
         // 添加HTTP客户端
         services.AddHttpClient(GameConst.GameRequestHttpGroupName, options => { options.BaseAddress = new Uri(gameServerOptions.HttpRootUrl); });
     }

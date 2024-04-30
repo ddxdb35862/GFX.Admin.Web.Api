@@ -2,4 +2,4 @@
 **/bin
 **/obj
 **/logs
-.DS_Store
+*.sln.DotSettings.user
