@@ -73,6 +73,7 @@ public class AdminResultProvider : IUnifyResultProvider
                     msg = authFailMsg + "";
                 await context.Response.WriteAsJsonAsync(RESTfulResult(statusCode, errors: msg),
                     App.GetOptions<JsonOptions>()?.JsonSerializerOptions);
+                throw new UnauthorizedAccessException(msg);
                 break;
             // 处理 403 状态码
             case StatusCodes.Status403Forbidden:

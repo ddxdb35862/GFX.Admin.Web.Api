@@ -12,6 +12,7 @@ using Flurl.Http;
 using Flurl.Http.Configuration;
 using GameFrameX.Core.Option;
 using Microsoft.Extensions.Options;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using SKIT.FlurlHttpClient;
 using SKIT.FlurlHttpClient.Wechat.Api;
 
@@ -88,10 +89,12 @@ public partial class WechatApiHttpClientFactory
         public DelegatingFlurlClientFactory(global::System.Net.Http.IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            Furion.Logging.Log.Information("Creating FlurlClientFactory for {0}", httpClientFactory.ToString());
         }
 
         public IFlurlClient Get(Url url)
         {
+            Furion.Logging.Log.Information("Creating FlurlClient for {0}", url);
             return new FlurlClient(_httpClientFactory.CreateClient(url.ToUri().Host));
         }
 

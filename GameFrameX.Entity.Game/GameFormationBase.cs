@@ -17,7 +17,7 @@ namespace GameFrameX.Entity.Game;
 [SugarTable(null, "游戏阵容")]
 [SysTable]
 [IncreTable]
-public class GameFormationBaseEntity : EntityBaseSelect
+public class GameFormationBase : EntityBaseSelect
 {
     /// <summary>
     /// 轮次，在一次闯关中
@@ -66,48 +66,24 @@ public class GameFormationBaseEntity : EntityBaseSelect
     /// </summary>
     [SugarColumn(ColumnDescription = "难度等级")]
     public FormationDifficultyLevelEnum DifficultyLevelEnum { get; set; }
-
-    /// <summary>
-    /// 背包，需要反序列化
-    /// </summary>
-    [SugarColumn(ColumnDescription = "背包,json")]
-    public string? CapacityLayerItemProtos { get; set; }
     
     /// <summary>
     /// 背包，已反序列化
     /// </summary>
     [SugarColumn(ColumnDescription = "背包")]
     public List<GameItemEntity> CapacityLayerItems { get; set; }
-
-    /// <summary>
-    /// 道具，需要反序列化
-    /// </summary>
-    [SugarColumn(ColumnDescription = "道具,json")]
-    public string? ItemLayerItemProtos { get; set; }
     
     /// <summary>
     /// 道具，已反序列化
     /// </summary>
     [SugarColumn(ColumnDescription = "道具")]
     public List<GameItemEntity> ItemLayerItems { get; set; }
-
-    /// <summary>
-    /// 职业皮肤，需要反序列化
-    /// </summary>
-    [SugarColumn(ColumnDescription = "职业皮肤,json")]
-    public string? CareerItemProtos { get; set; }
     
     /// <summary>
     /// 职业皮肤，已反序列化
     /// </summary>
     [SugarColumn(ColumnDescription = "职业皮肤")]
     public List<GameItemEntity> CareerItems { get; set; }
-
-    /// <summary>
-    /// 组合，需要反序列化
-    /// </summary>
-    [SugarColumn(ColumnDescription = "组合,json")]
-    public string? ItemCompositeProtos { get; set; }
     
     /// <summary>
     /// 组合，已反序列化
@@ -126,4 +102,10 @@ public class GameFormationBaseEntity : EntityBaseSelect
     /// </summary>
     [SugarColumn(ColumnDescription = "是否已编辑过")]
     public bool HasEditor { get; set; }
+    
+    /// <summary>
+    /// 状态，1无效，0有效
+    /// </summary>
+    [SugarColumn(ColumnDescription = "状态，1无效，0有效")]
+    public int Status { get; set; }
 }

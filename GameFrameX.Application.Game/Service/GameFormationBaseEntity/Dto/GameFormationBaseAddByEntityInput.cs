@@ -3,7 +3,7 @@
 /// <summary>
 /// 游戏阵容增加输入参数
 /// </summary>
-public class AddGameFormationBaseEntityInput : BaseAddInput
+public class AddGameFormationBaseInput : BaseAddInput
 {
     /// <summary>
     /// 主键Id

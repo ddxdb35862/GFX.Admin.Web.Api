@@ -6,7 +6,7 @@ namespace GameFrameX.Application.Game;
 /// <summary>
 /// 游戏区服分页查询输入参数
 /// </summary>
-public class GameFormationBaseEntityInput : BasePageInput
+public class GameFormationBaseInput : BasePageInput
 {
         
     /// <summary>

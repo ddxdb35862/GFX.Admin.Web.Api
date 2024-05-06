@@ -19,6 +19,11 @@ public class GameHomeEntityService : IDynamicApiController, ITransient
     private readonly SqlSugarRepository<GameUserEntity> _rep;
     private readonly IHttpClientFactory _httpClientFactory;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="rep"></param>
+    /// <param name="httpClientFactory"></param>
     public GameHomeEntityService(SqlSugarRepository<GameUserEntity> rep, IHttpClientFactory httpClientFactory)
     {
         _rep = rep;
