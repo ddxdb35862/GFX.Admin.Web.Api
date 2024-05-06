@@ -139,6 +139,7 @@ public class GameFormationBaseEntityService : BaseSelectService<GameFormationBas
     [ApiDescriptionSettings(Name = "List")]
     public async Task<List<GameFormationBaseEntityOutput>> List([FromQuery] GameFormationBaseEntityInput input)
     {
+        
         return await Repository.AsQueryable().Select<GameFormationBaseEntityOutput>().ToListAsync();
     }
 

@@ -7,6 +7,7 @@
 // 软件按“原样”提供，不提供任何形式的明示或暗示的保证，包括但不限于对适销性、适用性和非侵权的保证。
 // 在任何情况下，作者或版权持有人均不对任何索赔、损害或其他责任负责，无论是因合同、侵权或其他方式引起的，与软件或其使用或其他交易有关。
 
+using Furion.Logging;
 using GameFrameX.Core.Base.Option;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,10 +28,9 @@ public class Startup : AppStartup
         var gameServerHostPort = Environment.GetEnvironmentVariable("GAME_SERVER_HOST_PORT");
         if (!string.IsNullOrEmpty(gameServerHostPort))
         {
-            Log.Information($"数据库类型:{config.DbType}连接字符串:{config.ConnectionString}");
-            
             gameServerOptions.HttpRootUrl = $"http://{gameServerHostPort}";
         }
+        Log.Information($"HttpRootUrl:{gameServerOptions.HttpRootUrl}");
         // 添加HTTP客户端
         services.AddHttpClient(GameConst.GameRequestHttpGroupName, options => { options.BaseAddress = new Uri(gameServerOptions.HttpRootUrl); });
     }
