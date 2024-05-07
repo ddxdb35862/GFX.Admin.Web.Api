@@ -1,7 +1,4 @@
-﻿using GameFrameX.Core;
-using System.ComponentModel.DataAnnotations;
-
-namespace GameFrameX.Application.Game;
+﻿namespace GameFrameX.Application.Game;
 
 /// <summary>
 /// 游戏区服分页查询输入参数
@@ -27,4 +24,8 @@ public class GameFormationBaseInput : BasePageInput
     /// </summary>
     public int? CareerSkinConfigId { get; set; }
     
+    /// <summary>
+    /// 合并的玩家Id，如果没有输入，则默认合并所有玩家
+    /// </summary>
+    public string? ToMergePlayerUnitIds { get; set; }
 }

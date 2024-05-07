@@ -33,6 +33,8 @@ public class Startup : AppStartup
         Log.Information($"HttpRootUrl:{gameServerOptions.HttpRootUrl}");
         // 添加HTTP客户端
         services.AddHttpClient(GameConst.GameRequestHttpGroupName, options => { options.BaseAddress = new Uri(gameServerOptions.HttpRootUrl); });
+        // 注册MyStartupService
+        services.AddHostedService<MyStartupService>(); 
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

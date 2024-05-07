@@ -1,6 +1,5 @@
 ﻿using ET;
 using Furion.Logging;
-using RazorEngine;
 
 namespace GameFrameX.Application.Game;
 
@@ -11,18 +10,18 @@ namespace GameFrameX.Application.Game;
 [AllowAnonymous]
 public class GameFormationBaseService : IDynamicApiController, ITransient
 {
-    private readonly SqlSugarRepository<GameUserEntity> _rep;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly GameCareerSkinConfigService _gameCareerSkinConfigService;
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="rep"></param>
     /// <param name="httpClientFactory"></param>
-    public GameFormationBaseService(SqlSugarRepository<GameUserEntity> rep, IHttpClientFactory httpClientFactory)
+    /// <param name="gameCareerSkinConfigService"></param>
+    public GameFormationBaseService(IHttpClientFactory httpClientFactory, GameCareerSkinConfigService gameCareerSkinConfigService)
     {
-        _rep = rep;
         _httpClientFactory = httpClientFactory;
+        _gameCareerSkinConfigService = gameCareerSkinConfigService;
     }
 
 
@@ -63,7 +62,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         List<GameFormationBaseOutput> list = new List<GameFormationBaseOutput>();
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
         BattleFormationProto proto = await CopyFormation(input);
-        proto.Status = 1;
+        proto.IsDeleted = 1;
         string requestBody = MongoHelper.ToJson(proto);
         HttpContent content = new StringContent(requestBody);//UTF8
         var response = await client.PostAsync("/admin/pool_battle_formation/addOrUpdate", content);
@@ -81,9 +80,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     [ApiDescriptionSettings(Name = "Delete")]
     public async Task<bool> Delete(DeleteGameFormationBaseInput input)
     {
-        return false;
-        //var entity = await Repository.GetFirstAsync(u => u.Id == input.Id) ?? throw Oops.Oh(ErrorCodeEnum.D1002);
-        //await Repository.DeleteAsync(entity);   //真删除
+        return await this.LogicDelete(input);
     }
 
     /// <summary>
@@ -119,11 +116,11 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
         var response = await client.GetAsync("/admin/pool_battle_formation/detail?id="+input.Id);
         var result = response.Content.ReadAsStringAsync().Result;
-        var body = MongoHelper.FromJson<HttpGetBattleFormationResponse>(result);
+        var body = MongoHelper.FromJson<HttpGetPoolFormationResponse>(result);
         if (body.Error == ErrorCode.ERR_Success)
         { 
             var listFrom = body.BattleFormationProto;
-            CopyFormation(out detail, listFrom);
+            CopyFormation(listFrom, out detail);
         }
         return detail;
     }
@@ -131,16 +128,18 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     /// <summary>
     /// 获取游戏阵容列表
     /// </summary>
-    /// <param name="input"></param>
     /// <returns></returns>
     [HttpPost]
-    [ApiDescriptionSettings(Name = "MergeFromOnline")]
-    public async Task<bool> MergeFromOnline()
+    [ApiDescriptionSettings(Name = "MergeOnline")]
+    public async Task<bool> MergeOnline([FromBody] GameFormationBaseInput input)
     {
+        if (string.IsNullOrEmpty(input.ToMergePlayerUnitIds))
+        {
+            return false;
+        }
         long start = DateTime.Now.Millisecond;
-        List<GameFormationBaseOutput> list = new List<GameFormationBaseOutput>();
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-        var response = await client.PostAsync("/admin/pool_battle_formation/merge_from_online", null);
+        var response = await client.PostAsync("/admin/pool_battle_formation/merge_online?playerIds="+input.ToMergePlayerUnitIds, null);
         var result = response.Content.ReadAsStringAsync().Result;
         var body = MongoHelper.FromJson<HttpCommonResponse>(result);
         Log.Information($"merge formation span {DateTime.Now.Millisecond - start} ms, {body.Message}");
@@ -152,15 +151,15 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    [HttpGet]
+    [HttpPost]
     [ApiDescriptionSettings(Name = "List")]
-    public async Task<List<GameFormationBaseOutput>> List([FromQuery] GameFormationBaseInput input)
+    public async Task<List<GameFormationBaseOutput>> List([FromBody] GameFormationBaseInput input)
     {
         List<GameFormationBaseOutput> list = new List<GameFormationBaseOutput>();
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
         var response = await client.GetAsync("/admin/pool_battle_formation/list?roundId="+input.RoundId+"&rank="+input.Rank+"&careerConfigId="+input.CareerConfigId+"&careerSkinConfigId="+input.CareerSkinConfigId);
         var result = response.Content.ReadAsStringAsync().Result;
-        var body = MongoHelper.FromJson<HttpGetBattleFormationsResponse>(result);
+        var body = MongoHelper.FromJson<HttpGetPoolFormationsResponse>(result);
         if (body.Error == ErrorCode.ERR_Success)
         { 
             var listFrom = body.BattleFormationProtos;
@@ -174,48 +173,51 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="list"></param>
-    /// <param name="listFrom"></param>
-    private void CopyList(ref List<GameFormationBaseOutput> list, List<BattleFormationProto> listFrom)
+    /// <param name="tos"></param>
+    /// <param name="froms"></param>
+    private void CopyList(ref List<GameFormationBaseOutput> tos, List<BattleFormationProto> froms)
     {
-        if (listFrom.IsNullOrEmpty())
+        if (froms.IsNullOrEmpty())
         {
             return;
         }
 
-        foreach (var formationProto in listFrom)
+        foreach (var from in froms)
         {
-            CopyFormation(out GameFormationBaseOutput to, formationProto);
-            list.Add(to);
+            CopyFormation(from, out GameFormationBaseOutput to);
+            tos.Add(to);
         }
     }
 
     /// <summary>
     /// 删除
     /// </summary>
-    /// <param name="from"></param>
-    private async Task<BattleFormationProto> CopyFormation(DeleteGameFormationBaseInput from)
+    /// <param name="deleteInput"></param>
+    private async Task<BattleFormationProto> CopyFormation(DeleteGameFormationBaseInput deleteInput)
     {
-        long id = from.Id;
+        long id = deleteInput.Id;
         GameFormationBase origin = await this.Get(new QueryByIdGameFormationBaseInput(){Id = id});
-        CopyFormation(out BattleFormationProto to, origin);
+        CopyFormation(origin, out BattleFormationProto to);
         return to;
     }
 
     /// <summary>
     /// 更改
     /// </summary>
-    /// <param name="from"></param>
-    private async Task<BattleFormationProto> CopyFormation(UpdateGameFormationBaseInput from)
+    /// <param name="updateInput"></param>
+    private async Task<BattleFormationProto> CopyFormation(UpdateGameFormationBaseInput updateInput)
     {
-        long id = from.Id;
+        long id = updateInput.Id;
         GameFormationBase origin = await this.Get(new QueryByIdGameFormationBaseInput(){Id = id});
-        CopyFormation(out BattleFormationProto to, origin);
+        CopyFormation(origin, out BattleFormationProto to);
 
-        to.DifficultyLevel = (int)from.DifficultyLevelEnum;
+        to.DifficultyLevel = (int)updateInput.DifficultyLevelEnum;
 
-        var gameItemLayerItemEntities = to.ItemLayerItemProtos;
-        CopyItems(ref gameItemLayerItemEntities, from.ItemLayerItems);
+        if (!updateInput.ItemLayerItems.IsNullOrEmpty())
+        {
+            CopyItems(updateInput.ItemLayerItems, out List<ItemProto> gameItemLayerItemEntities);
+            to.ItemLayerItemProtos = gameItemLayerItemEntities;
+        }
         
         return to;
     }
@@ -225,10 +227,32 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="to"></param>
     /// <param name="from"></param>
-    private void CopyFormation(out BattleFormationProto to, GameFormationBase from)
+    private void CopyFormation(GameFormationBase from, out BattleFormationProto to)
     {
         to = new BattleFormationProto();
-        //TODO ....
+        to.Id = from.Id;
+        to.RoundId = from.RoundId;
+        to.PlayerRank = from.PlayerRank;
+        //to.PlayerCareerConfigId = from.PlayerCareerConfigId;
+        to.PlayerCareerSkinConfigId = from.PlayerCareerSkinConfigId;
+        to.PlayerName = from.PlayerName;
+        to.PlayerIcon = from.PlayerIcon;
+        to.PlayerUnitId = from.PlayerUnitId;
+        to.CanComposite = from.CanComposite;
+        to.CreateTime = from.CreateTime;
+        to.UpdateTime = from.UpdateTime;
+        to.IsDeleted = from.IsDeleted;
+        to.DifficultyLevel = (int)from.DifficultyLevelEnum;
+        to.Remark = from.Remark;
+        
+        CopyItems(from.CareerItems, out List<ItemProto> gameCareerItemEntities);
+        to.CareerItemProtos = gameCareerItemEntities;
+        
+        CopyItems(from.CapacityLayerItems, out List<ItemProto> gameCapacityLayerItemEntities);
+        to.CapacityLayerItemProtos = gameCapacityLayerItemEntities;
+        
+        CopyItems(from.ItemLayerItems, out List<ItemProto> gameItemLayerItemEntities);
+        to.ItemLayerItemProtos = gameItemLayerItemEntities;
     }
     
     /// <summary>
@@ -236,120 +260,129 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     /// </summary>
     /// <param name="to"></param>
     /// <param name="from"></param>
-    private async Task<BattleFormationProto> CopyFormation(AddGameFormationBaseInput from)
+    private void CopyFormation(BattleFormationProto from, out GameFormationBaseOutput to)
     {
-        return null;
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="to"></param>
-    /// <param name="from"></param>
-    /// <exception cref="NotImplementedException"></exception>
-    private void CopyFormation(out GameFormationBaseOutput to, BattleFormationProto from)
-    {
+        CareerConfig? config = _gameCareerSkinConfigService.GetCareer(from.PlayerCareerSkinConfigId);
+        
         to = new GameFormationBaseOutput();
         to.Id = from.Id;
-        to.Rank = from.PlayerRank;
-        to.CareerConfigId = 0;//from.CareerConfigId;
-        to.CareerSkinConfigId = from.PlayerCareerSkinConfigId;
+        to.PlayerRank = from.PlayerRank;
+        if (config != null)
+        {
+            to.PlayerCareerConfigId = config.Id;
+        }
+        else
+        {
+            to.PlayerCareerConfigId = 0;
+        }
+        to.PlayerCareerSkinConfigId = from.PlayerCareerSkinConfigId;
         to.PlayerName = from.PlayerName;
-        to.PlayerAvatar = from.PlayerIcon;
+        to.PlayerIcon = from.PlayerIcon;
         to.PlayerUnitId = from.PlayerUnitId;
         to.RoundId = from.RoundId;
         to.CanComposite = from.CanComposite;
+        to.CreateTime = from.CreateTime;
+        to.UpdateTime = from.UpdateTime;
+        to.IsDeleted = from.IsDeleted;
+        to.DifficultyLevelEnum = (DifficultyLevelEnum)from.DifficultyLevel;
+        to.Remark = from.Remark;
+
         
-        var gameCareerItemEntities = to.CareerItems;
-        CopyItems(ref gameCareerItemEntities, from.CareerItemProtos);
-        var gameCapacityLayerItemEntities = to.CapacityLayerItems;
-        CopyItems(ref gameCapacityLayerItemEntities, from.CapacityLayerItemProtos);
-        var gameItemLayerItemEntities = to.ItemLayerItems;
-        CopyItems(ref gameItemLayerItemEntities, from.ItemLayerItemProtos);
+        CopyItems(from.CareerItemProtos, out List<GameItemEntity> gameCareerItemEntities);
+        to.CareerItems = gameCareerItemEntities;
         
-        //var gameItemCompositeEntities = to.ItemComposites;
-        //CopyComposite(ref gameItemCompositeEntities, from.CompositeGroupIds);
+        CopyItems(from.CapacityLayerItemProtos, out List<GameItemEntity> gameCapacityLayerItemEntities);
+        to.CapacityLayerItems = gameCapacityLayerItemEntities;
+        
+        CopyItems(from.CapacityLayerItemProtos, out List<GameItemEntity> gameItemLayerItemEntities);
+        to.ItemLayerItems = gameItemLayerItemEntities;
+        
+        //var to = to.ItemComposites;
+        //CopyComposite(ref to, deleteInput.CompositeGroupIds);
     }
     /// <summary>
     /// 复制Item
     /// </summary>
-    /// <param name="gameItemEntities"></param>
-    /// <param name="fromItemProtos"></param>
-    private void CopyItems(ref List<GameItemEntity> gameItemEntities, List<ItemProto> fromItemProtos)
+    /// <param name="to"></param>
+    /// <param name="from"></param>
+    private void CopyItems(List<ItemProto> from, out List<GameItemEntity> to)
     {
-        if (fromItemProtos.IsNullOrEmpty())
+        if (from.IsNullOrEmpty())
         {
+            to = null;
             return;
         }
-        gameItemEntities = new List<GameItemEntity>(fromItemProtos.Count);
-        foreach (var fromItem in fromItemProtos)
+        to = new List<GameItemEntity>(from.Count);
+        foreach (var fromItem in from)
         {
-            CopyItem(out GameItemEntity toItem, fromItem);
-            gameItemEntities.Add(toItem);
+            CopyItem(fromItem, out GameItemEntity toItem);
+            to.Add(toItem);
         }
     }
 
-    private void CopyItem(out GameItemEntity gameItemEntity, ItemProto fromItem)
+    private void CopyItem(ItemProto from, out GameItemEntity to)
     {
-        gameItemEntity = new GameItemEntity();
-        gameItemEntity.Id = fromItem.Id;
-        gameItemEntity.ConfigId = fromItem.ConfigId;
-        gameItemEntity.Bag = fromItem.Bag;
-        gameItemEntity.Discount = fromItem.Discount;
-        gameItemEntity.Locked = fromItem.Locked;
-        gameItemEntity.Sold = fromItem.Sold;
-        gameItemEntity.Price = fromItem.Price;
-        gameItemEntity.IndexId = fromItem.IndexId;
-        gameItemEntity.Z_Rotation = fromItem.Z_Rotation;
-        gameItemEntity.CentrePosX = fromItem.CentrePosX;
-        gameItemEntity.CentrePosY = fromItem.CentrePosY;
-        gameItemEntity.CurrentBelongItemCompositeId = fromItem.CurrentBelongItemCompositeId;
-        gameItemEntity.BelongItemCompositeIds = fromItem.BelongItemCompositeIds;
+        to = new GameItemEntity();
+        to.Id = from.Id;
+        to.ConfigId = from.ConfigId;
+        to.Bag = from.Bag;
+        to.Discount = from.Discount;
+        to.Locked = from.Locked;
+        to.Sold = from.Sold;
+        to.Price = from.Price;
+        to.IndexId = from.IndexId;
+        to.Z_Rotation = from.Z_Rotation;
+        to.CentrePosX = from.CentrePosX;
+        to.CentrePosY = from.CentrePosY;
+        to.CurrentBelongItemCompositeId = from.CurrentBelongItemCompositeId;
+        to.BelongItemCompositeIds = from.BelongItemCompositeIds;
     }
 
     /// <summary>
     /// 复制Item
     /// </summary>
-    /// <param name="gameItemEntities"></param>
-    /// <param name="fromItemProtos"></param>
-    private void CopyItems(ref List<ItemProto> gameItemEntities, List<GameItemEntity> fromItemProtos)
+    /// <param name="to"></param>
+    /// <param name="from"></param>
+    private void CopyItems(List<GameItemEntity> from, out List<ItemProto> to)
     {
-        if (fromItemProtos.IsNullOrEmpty())
+        if (from.IsNullOrEmpty())
         {
+            to = null;
             return;
         }
-        gameItemEntities = new List<ItemProto>(fromItemProtos.Count);
-        foreach (var fromItem in fromItemProtos)
+        to = new List<ItemProto>(from.Count);
+        foreach (var fromItem in from)
         {
-            CopyItem(out ItemProto toItem, fromItem);
-            gameItemEntities.Add(toItem);
+            CopyItem(fromItem, out ItemProto toItem);
+            to.Add(toItem);
         }
     }
 
-    private void CopyItem(out ItemProto gameItemEntity, GameItemEntity fromItem)
+    private void CopyItem(GameItemEntity from, out ItemProto to)
     {
-        gameItemEntity = new ItemProto();
-        gameItemEntity.Id = fromItem.Id;
-        gameItemEntity.ConfigId = fromItem.ConfigId;
-        gameItemEntity.Bag = fromItem.Bag;
-        gameItemEntity.Discount = fromItem.Discount;
-        gameItemEntity.Locked = fromItem.Locked;
-        gameItemEntity.Sold = fromItem.Sold;
-        gameItemEntity.Price = fromItem.Price;
-        gameItemEntity.IndexId = fromItem.IndexId;
-        gameItemEntity.Z_Rotation = fromItem.Z_Rotation;
-        gameItemEntity.CentrePosX = fromItem.CentrePosX;
-        gameItemEntity.CentrePosY = fromItem.CentrePosY;
-        gameItemEntity.CurrentBelongItemCompositeId = fromItem.CurrentBelongItemCompositeId;
-        gameItemEntity.BelongItemCompositeIds = fromItem.BelongItemCompositeIds;
+        to = new ItemProto();
+        to.Id = from.Id;
+        to.ConfigId = from.ConfigId;
+        to.Bag = from.Bag;
+        to.Discount = from.Discount;
+        to.Locked = from.Locked;
+        to.Sold = from.Sold;
+        to.Price = from.Price;
+        to.IndexId = from.IndexId;
+        to.Z_Rotation = from.Z_Rotation;
+        to.CentrePosX = from.CentrePosX;
+        to.CentrePosY = from.CentrePosY;
+        to.CurrentBelongItemCompositeId = from.CurrentBelongItemCompositeId;
+        to.BelongItemCompositeIds = from.BelongItemCompositeIds;
     }
 
     /// <summary>
     /// 复制合成关系
     /// </summary>
-    /// <param name="gameItemCompositeEntities"></param>
-    /// <param name="fromCompositeGroupIds"></param>
+    /// <param name="to"></param>
+    /// <param name="from"></param>
     /// <exception cref="NotImplementedException"></exception>
-    private void CopyComposite(ref List<GameCompositeItemEntity> gameItemCompositeEntities, List<ItemCompositeProto> fromCompositeGroupIds)
+    private void CopyComposite(ref List<GameCompositeItemEntity> to, List<ItemCompositeProto> from)
     {
         throw new NotImplementedException();
     }

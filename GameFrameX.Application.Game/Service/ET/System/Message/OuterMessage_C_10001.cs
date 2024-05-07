@@ -1219,7 +1219,6 @@ namespace ET
 
 	}
 
-
 	[Message(OuterMessage.BattleFormationProto)]
 	[MemoryPackable]
 	public partial class BattleFormationProto: MessageObject
@@ -1266,10 +1265,22 @@ namespace ET
 		public List<ItemProto> CareerItemProtos { get; set; } = new();
 
 		[MemoryPackOrder(12)]
-		public int Status { get; set; }
+		public int DifficultyLevel { get; set; }
 
 		[MemoryPackOrder(13)]
-		public int DifficultyLevel { get; set; }
+		public long CreateTime { get; set; }
+
+		[MemoryPackOrder(14)]
+		public long UpdateTime { get; set; }
+
+		[MemoryPackOrder(15)]
+		public long UpdateUserId { get; set; }
+
+		[MemoryPackOrder(16)]
+		public int IsDeleted { get; set; }
+
+		[MemoryPackOrder(17)]
+		public string Remark { get; set; }
 
 		public override void Dispose() 
 		{
@@ -1286,8 +1297,12 @@ namespace ET
 			this.PlayerName = default;
 			this.PlayerIcon = default;
 			this.CareerItemProtos.Clear();
-			this.Status = default;
 			this.DifficultyLevel = default;
+			this.CreateTime = default;
+			this.UpdateTime = default;
+			this.UpdateUserId = default;
+			this.IsDeleted = default;
+			this.Remark = default;
 			
 			ObjectPool.Instance.Recycle(this); 
 		}
@@ -4176,15 +4191,14 @@ namespace ET
 
 	}
 
-
 //HTTP Manager返回查询需要的阵容对象s
-	[Message(OuterMessage.HttpGetBattleFormationsResponse)]
+	[Message(OuterMessage.HttpGetPoolFormationsResponse)]
 	[MemoryPackable]
-	public partial class HttpGetBattleFormationsResponse: MessageObject
+	public partial class HttpGetPoolFormationsResponse: MessageObject
 	{
-		public static HttpGetBattleFormationsResponse Create(bool isFromPool = true) 
+		public static HttpGetPoolFormationsResponse Create(bool isFromPool = true) 
 		{ 
-			return ObjectPool.Instance.Fetch(typeof(HttpGetBattleFormationsResponse), isFromPool) as HttpGetBattleFormationsResponse; 
+			return ObjectPool.Instance.Fetch(typeof(HttpGetPoolFormationsResponse), isFromPool) as HttpGetPoolFormationsResponse; 
 		}
 
 		[MemoryPackOrder(0)]
@@ -4209,13 +4223,13 @@ namespace ET
 	}
 
 //HTTP Manager返回查询需要的阵容对象
-	[Message(OuterMessage.HttpGetBattleFormationResponse)]
+	[Message(OuterMessage.HttpGetPoolFormationResponse)]
 	[MemoryPackable]
-	public partial class HttpGetBattleFormationResponse: MessageObject
+	public partial class HttpGetPoolFormationResponse: MessageObject
 	{
-		public static HttpGetBattleFormationResponse Create(bool isFromPool = true) 
+		public static HttpGetPoolFormationResponse Create(bool isFromPool = true) 
 		{ 
-			return ObjectPool.Instance.Fetch(typeof(HttpGetBattleFormationResponse), isFromPool) as HttpGetBattleFormationResponse; 
+			return ObjectPool.Instance.Fetch(typeof(HttpGetPoolFormationResponse), isFromPool) as HttpGetPoolFormationResponse; 
 		}
 
 		[MemoryPackOrder(0)]
@@ -4375,7 +4389,7 @@ namespace ET
 		 public const ushort C2M_RequestRewards = 10131;
 		 public const ushort M2C_RequestRewards = 10132;
 		 public const ushort HttpCommonResponse = 10133;
-		 public const ushort HttpGetBattleFormationsResponse = 10134;
-		 public const ushort HttpGetBattleFormationResponse = 10135;
+		 public const ushort HttpGetPoolFormationsResponse = 10134;
+		 public const ushort HttpGetPoolFormationResponse = 10135;
 	}
 }

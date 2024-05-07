@@ -113,8 +113,8 @@ public class GameHomeEntityService : IDynamicApiController, ITransient
     /// <param name="input"></param>
     /// <returns></returns>
     /*[HttpGet]
-    [ApiDescriptionSettings(Name = "List")]
-    public async Task<List<GameUserEntityOutput>> List([FromQuery] GameUserEntityInput input)
+    [ApiDescriptionSettings(Name = "Init")]
+    public async Task<Init<GameUserEntityOutput>> Init([FromQuery] GameUserEntityInput input)
     {
         return await _rep.AsQueryable().Select<GameUserEntityOutput>().ToListAsync();
     }*/

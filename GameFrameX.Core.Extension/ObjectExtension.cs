@@ -241,7 +241,7 @@ public static partial class ObjectExtension
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public static bool IsNullOrEmpty(this object obj)
+    public static bool IsNullOrEmpty(this object? obj)
     {
         return obj == null || string.IsNullOrEmpty(obj.ToString());
     }

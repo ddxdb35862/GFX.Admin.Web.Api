@@ -1,6 +1,4 @@
-﻿using GameFrameX.Core;
-using System.ComponentModel.DataAnnotations;
-using SqlSugar;
+﻿using SqlSugar;
 
 namespace GameFrameX.Application.Game;
 
@@ -13,7 +11,7 @@ public class UpdateGameFormationBaseInput : BaseUpdateInput
     /// 是否是默认
     /// </summary>
     [SugarColumn(ColumnDescription = "难度等级")]
-    public FormationDifficultyLevelEnum DifficultyLevelEnum { get; set; }
+    public DifficultyLevelEnum DifficultyLevelEnum { get; set; }
     
     /// <summary>
     /// 道具，已反序列化

@@ -5,5 +5,6 @@
 /// </summary>
 public class GameFormationBaseOutput : GameFormationBase, IBasePageOutput<GameFormationBase>
 {
-
+    public string S_UpdateTime { get; set; }
+    public string S_CreateTime { get; set; }
 }

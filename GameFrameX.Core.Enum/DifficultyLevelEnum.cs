@@ -13,7 +13,7 @@ namespace GameFrameX.Core.Enum;
 /// 阵容难度等级
 /// </summary>
 [Description("阵容难度等级")]
-public enum FormationDifficultyLevelEnum
+public enum DifficultyLevelEnum
 {
     /// <summary>
     /// 是

@@ -29,19 +29,19 @@ public class GameFormationBase : EntityBaseSelect
     /// 所属玩家排名
     /// </summary>
     [SugarColumn(ColumnDescription = "所属玩家排名")]
-    public int Rank { get; set; }
+    public int PlayerRank { get; set; }
 
     /// <summary>
     /// 玩家职业id
     /// </summary>
     [SugarColumn(ColumnDescription = "职业Id")]
-    public int CareerConfigId { get; set; }
+    public int PlayerCareerConfigId { get; set; }
 
     /// <summary>
     /// 玩家职业皮肤id
     /// </summary>
     [SugarColumn(ColumnDescription = "职业皮肤Id")]
-    public int CareerSkinConfigId { get; set; }
+    public int PlayerCareerSkinConfigId { get; set; }
 
     /// <summary>
     /// 玩家Id
@@ -59,13 +59,13 @@ public class GameFormationBase : EntityBaseSelect
     /// 玩家头像
     /// </summary>
     [SugarColumn(ColumnDescription = "玩家头像")]
-    public string? PlayerAvatar { get; set; }
+    public string? PlayerIcon { get; set; }
 
     /// <summary>
     /// 是否是默认
     /// </summary>
     [SugarColumn(ColumnDescription = "难度等级")]
-    public FormationDifficultyLevelEnum DifficultyLevelEnum { get; set; }
+    public DifficultyLevelEnum DifficultyLevelEnum { get; set; }
     
     /// <summary>
     /// 背包，已反序列化
@@ -104,8 +104,26 @@ public class GameFormationBase : EntityBaseSelect
     public bool HasEditor { get; set; }
     
     /// <summary>
-    /// 状态，1无效，0有效
+    /// 是否删除
     /// </summary>
-    [SugarColumn(ColumnDescription = "状态，1无效，0有效")]
-    public int Status { get; set; }
+    [SugarColumn(ColumnDescription = "状态，1已删除，0未删除")]
+    public int IsDeleted { get; set; }
+    
+    /// <summary>
+    /// 创建时间
+    /// </summary>
+    [SugarColumn(ColumnDescription = "创建时间")]
+    public long CreateTime { get; set; }
+    
+    /// <summary>
+    /// 更新时间
+    /// </summary>
+    [SugarColumn(ColumnDescription = "更新时间")]
+    public long UpdateTime { get; set; }
+    
+    /// <summary>
+    /// 备注
+    /// </summary>
+    [SugarColumn(ColumnDescription = "备注")]
+    public string? Remark { get; set; }
 }
