@@ -18,7 +18,7 @@ public abstract class EntityBaseSelect : EntityBase, ISelectFilter
     /// 名称
     /// </summary>
     [SugarColumn(ColumnDescription = "名称", Length = 64)]
-    [Required, MaxLength(64)]
+    [MaxLength(64)]
     public string Name { get; set; }
 
     /// <summary>

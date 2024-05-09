@@ -1256,10 +1256,10 @@ namespace ET
 		public bool CanComposite { get; set; }
 
 		[MemoryPackOrder(9)]
-		public string PlayerName { get; set; }
+		public string? PlayerName { get; set; }
 
 		[MemoryPackOrder(10)]
-		public string PlayerIcon { get; set; }
+		public string? PlayerIcon { get; set; }
 
 		[MemoryPackOrder(11)]
 		public List<ItemProto> CareerItemProtos { get; set; } = new();
@@ -1280,7 +1280,7 @@ namespace ET
 		public int IsDeleted { get; set; }
 
 		[MemoryPackOrder(17)]
-		public string Remark { get; set; }
+		public string? Remark { get; set; }
 
 		public override void Dispose() 
 		{

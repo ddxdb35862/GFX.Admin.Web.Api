@@ -9,6 +9,6 @@ namespace GameFrameX.Application.Game;
 /// </summary>
 public class DeleteGameFormationBaseInput : BaseDeleteInput
 {
-     
+     public string S_Id { get; set; }
 }
 

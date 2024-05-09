@@ -12,16 +12,20 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly GameCareerSkinConfigService _gameCareerSkinConfigService;
+    private readonly GameItemConfigService _gameItemConfigService;
+    private readonly GameItemTransformConfigService _gameItemTransformConfigService;
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="httpClientFactory"></param>
     /// <param name="gameCareerSkinConfigService"></param>
-    public GameFormationBaseService(IHttpClientFactory httpClientFactory, GameCareerSkinConfigService gameCareerSkinConfigService)
+    public GameFormationBaseService(IHttpClientFactory httpClientFactory, GameCareerSkinConfigService gameCareerSkinConfigService, GameItemConfigService gameItemConfigService, GameItemTransformConfigService gameItemTransformConfigService)
     {
         _httpClientFactory = httpClientFactory;
         _gameCareerSkinConfigService = gameCareerSkinConfigService;
+        _gameItemConfigService = gameItemConfigService;
+        _gameItemTransformConfigService = gameItemTransformConfigService;
     }
 
 
@@ -61,8 +65,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     {
         List<GameFormationBaseOutput> list = new List<GameFormationBaseOutput>();
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-        BattleFormationProto proto = await CopyFormation(input);
-        proto.IsDeleted = 1;
+        BattleFormationProto proto = await CopyFormationToDelete(input);
         string requestBody = MongoHelper.ToJson(proto);
         HttpContent content = new StringContent(requestBody);//UTF8
         var response = await client.PostAsync("/admin/pool_battle_formation/addOrUpdate", content);
@@ -83,6 +86,19 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         return await this.LogicDelete(input);
     }
 
+    /// <summary>
+    /// 删除
+    /// </summary>
+    /// <param name="deleteInput"></param>
+    private async Task<BattleFormationProto> CopyFormationToDelete(DeleteGameFormationBaseInput deleteInput)
+    {
+        var id = long.Parse(deleteInput.S_Id);
+        var origin = await this.Get(new QueryByIdGameFormationBaseInput(){Id = id});
+        CopyFormation(origin, out var to);
+        to.IsDeleted = 1;
+        return to;
+    }
+    
     /// <summary>
     /// 更新游戏阵容
     /// </summary>
@@ -190,33 +206,28 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     }
 
     /// <summary>
-    /// 删除
-    /// </summary>
-    /// <param name="deleteInput"></param>
-    private async Task<BattleFormationProto> CopyFormation(DeleteGameFormationBaseInput deleteInput)
-    {
-        long id = deleteInput.Id;
-        GameFormationBase origin = await this.Get(new QueryByIdGameFormationBaseInput(){Id = id});
-        CopyFormation(origin, out BattleFormationProto to);
-        return to;
-    }
-
-    /// <summary>
     /// 更改
     /// </summary>
     /// <param name="updateInput"></param>
     private async Task<BattleFormationProto> CopyFormation(UpdateGameFormationBaseInput updateInput)
     {
-        long id = updateInput.Id;
+        long id = long.Parse(updateInput.S_Id);
         GameFormationBase origin = await this.Get(new QueryByIdGameFormationBaseInput(){Id = id});
         CopyFormation(origin, out BattleFormationProto to);
 
         to.DifficultyLevel = (int)updateInput.DifficultyLevelEnum;
+        to.Remark = updateInput.Remark;
 
         if (!updateInput.ItemLayerItems.IsNullOrEmpty())
         {
             CopyItems(updateInput.ItemLayerItems, out List<ItemProto> gameItemLayerItemEntities);
             to.ItemLayerItemProtos = gameItemLayerItemEntities;
+        }
+
+        if (!updateInput.CapacityLayerItems.IsNullOrEmpty())
+        {
+            CopyItems(updateInput.CapacityLayerItems, out List<ItemProto> gameCapacityLayerItemEntities);
+            to.CapacityLayerItemProtos = gameCapacityLayerItemEntities;
         }
         
         return to;
@@ -254,7 +265,12 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         CopyItems(from.ItemLayerItems, out List<ItemProto> gameItemLayerItemEntities);
         to.ItemLayerItemProtos = gameItemLayerItemEntities;
     }
-    
+
+    private static string ShowAppendDate(long ms)
+    {
+        var create = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(ms);
+        return create.ToString("yyyyMMdd HH:mm:ss");
+    }
     /// <summary>
     /// 
     /// </summary>
@@ -266,6 +282,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         
         to = new GameFormationBaseOutput();
         to.Id = from.Id;
+        to.S_Id = from.Id.ToString();
         to.PlayerRank = from.PlayerRank;
         if (config != null)
         {
@@ -282,7 +299,9 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         to.RoundId = from.RoundId;
         to.CanComposite = from.CanComposite;
         to.CreateTime = from.CreateTime;
+        to.S_CreateTime = ShowAppendDate(from.CreateTime);
         to.UpdateTime = from.UpdateTime;
+        to.S_UpdateTime = ShowAppendDate(from.UpdateTime);
         to.IsDeleted = from.IsDeleted;
         to.DifficultyLevelEnum = (DifficultyLevelEnum)from.DifficultyLevel;
         to.Remark = from.Remark;
@@ -294,7 +313,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         CopyItems(from.CapacityLayerItemProtos, out List<GameItemEntity> gameCapacityLayerItemEntities);
         to.CapacityLayerItems = gameCapacityLayerItemEntities;
         
-        CopyItems(from.CapacityLayerItemProtos, out List<GameItemEntity> gameItemLayerItemEntities);
+        CopyItems(from.ItemLayerItemProtos, out List<GameItemEntity> gameItemLayerItemEntities);
         to.ItemLayerItems = gameItemLayerItemEntities;
         
         //var to = to.ItemComposites;
@@ -336,6 +355,66 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         to.CentrePosY = from.CentrePosY;
         to.CurrentBelongItemCompositeId = from.CurrentBelongItemCompositeId;
         to.BelongItemCompositeIds = from.BelongItemCompositeIds;
+        ItemConfig config = _gameItemConfigService.Get(from.ConfigId);
+        if (config != null)
+        {
+            to.ConfigName = config.Name;
+            to.GridIndexes = CalGrids(config.TransformId, from.CentrePosX, from.CentrePosY, from.Z_Rotation);
+        }
+        else
+        {
+            Log.Error($"Cant found itemConfig:{from.ConfigId}");
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="fackItemTransformConfigId"></param>
+    /// <param name="itemZRotation"></param>
+    /// <param name="realItemTransform"></param>
+    private void GetRealTransform(int fackItemTransformConfigId,int itemZRotation, out ItemTransformConfig? realItemTransform)
+    {
+        realItemTransform = null;
+        ItemTransformConfig? fackItemTransform = _gameItemTransformConfigService.Get(fackItemTransformConfigId);
+        List<ItemTransformConfig>? groupTransformConfigs = _gameItemTransformConfigService.GetGroup(fackItemTransform.GroupId);
+        if (groupTransformConfigs.IsNullOrEmpty())
+        {
+            Log.Warning($"异常Transform {fackItemTransform.GroupId}");
+            return;
+        }
+        int newGroupRotationId = (itemZRotation + fackItemTransform.GroupRotationId) % groupTransformConfigs.Count;
+        
+        realItemTransform = _gameItemTransformConfigService.GetGroupRotation(fackItemTransform.GroupId,newGroupRotationId);
+    }
+    
+    /// <summary>
+    /// 计算占格
+    /// </summary>
+    /// <param name="transformConfigId"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="zRotation"></param>
+    /// <returns></returns>
+    private List<int> CalGrids(int transformConfigId,int x,int y,int zRotation)
+    {
+        GetRealTransform(transformConfigId, zRotation, out ItemTransformConfig? realItemTransform);
+        if (realItemTransform == null)
+        {
+            return null;
+        }
+        
+        List<Vector2Int> gridList = GridHelper.SplitGridInItem(realItemTransform.GridArrays);
+        int offsetX = MathHelper.Divide1K(x - realItemTransform.CentreX);
+        int offsetY = MathHelper.Divide1K(y - realItemTransform.CentreY);
+        
+        List<int> gridIndexes = new (gridList.Count);
+        for (int i = 0; i < gridList.Count; i++)
+        {
+            Vector2Int grid = gridList[i];
+            gridIndexes.Add((offsetX + grid.X - 1) + (offsetY + grid.Y - 1) * 7);
+        }
+        return gridIndexes;
     }
 
     /// <summary>

@@ -21,6 +21,9 @@ public class GameItemEntity : EntityBaseId
 {
     [SugarColumn(ColumnDescription = "道具ConfigId")]
     public int ConfigId { get; set; }
+    
+    [SugarColumn(ColumnDescription = "道具名称")]
+    public string ConfigName { get; set; }
 
     [SugarColumn(ColumnDescription = "道具X坐标")]
     public int CentrePosX { get; set; }
@@ -54,4 +57,8 @@ public class GameItemEntity : EntityBaseId
 
     [SugarColumn(ColumnDescription = "旋转,0,1,2,3")]
     public int Z_Rotation { get; set; }
+    
+    [SugarColumn(ColumnDescription = "占地")]
+    public List<int> GridIndexes { get; set; }
+    
 }

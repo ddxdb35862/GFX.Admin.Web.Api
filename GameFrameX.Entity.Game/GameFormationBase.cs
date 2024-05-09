@@ -19,6 +19,9 @@ namespace GameFrameX.Entity.Game;
 [IncreTable]
 public class GameFormationBase : EntityBaseSelect
 {
+    public string S_UpdateTime { get; set; }
+    public string S_CreateTime { get; set; }
+    public string S_Id { get; set; }
     /// <summary>
     /// 轮次，在一次闯关中
     /// </summary>

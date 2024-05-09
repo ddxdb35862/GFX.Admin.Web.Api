@@ -10,6 +10,8 @@ public class MyStartupService : IHostedService, IDisposable
 {  
     private readonly GameCareerConfigService _gameCareerConfigService;
     private readonly GameCareerSkinConfigService _gameCareerSkinConfigService;  
+    private readonly GameItemConfigService _gameItemConfigService;  
+    private readonly GameItemTransformConfigService _gameItemTransformConfigService;  
     private Timer? _timer;  
   
     /// <summary>
@@ -17,10 +19,13 @@ public class MyStartupService : IHostedService, IDisposable
     /// </summary>
     /// <param name="gameCareerConfigService"></param>
     /// <param name="gameCareerSkinConfigService"></param>
-    public MyStartupService(GameCareerConfigService gameCareerConfigService, GameCareerSkinConfigService gameCareerSkinConfigService)
+    /// <param name="gameItemConfigService"></param>
+    public MyStartupService(GameCareerConfigService gameCareerConfigService, GameCareerSkinConfigService gameCareerSkinConfigService, GameItemConfigService gameItemConfigService, GameItemTransformConfigService gameItemTransformConfigService)
     {
         _gameCareerConfigService = gameCareerConfigService;
         _gameCareerSkinConfigService = gameCareerSkinConfigService;
+        _gameItemConfigService = gameItemConfigService;
+        _gameItemTransformConfigService = gameItemTransformConfigService;
     }  
   
     /// <summary>
@@ -43,8 +48,12 @@ public class MyStartupService : IHostedService, IDisposable
         Log.Information("MyStartupService init GameCareerConfig");
         await _gameCareerConfigService.Init(); // 调用你的Service方法
         Log.Information("MyStartupService init GameCareerSkinConfig");
-        await _gameCareerSkinConfigService.Init(); // 调用你的Service方法  
-  
+        await _gameCareerSkinConfigService.Init(); // 调用你的Service方法
+        Log.Information("MyStartupService init GameItemConfigService");  
+        await _gameItemConfigService.Init(); // 调用你的Service方法   
+        Log.Information("MyStartupService init GameItemTransformConfigService");
+        await _gameItemTransformConfigService.Init(); // 调用你的Service方法  
+        
         // 如果定时器只执行一次，则停止它  
         _timer?.Change(Timeout.Infinite, 0);  
     }  
