@@ -28,7 +28,6 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         _gameItemTransformConfigService = gameItemTransformConfigService;
     }
 
-
     /// <summary>
     /// 分页查询游戏阵容
     /// </summary>
@@ -68,7 +67,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         BattleFormationProto proto = await CopyFormationToDelete(input);
         string requestBody = MongoHelper.ToJson(proto);
         HttpContent content = new StringContent(requestBody);//UTF8
-        var response = await client.PostAsync("/admin/pool_battle_formation/addOrUpdate", content);
+        var response = await client.PostAsync("/manage/pool_battle_formation/addOrUpdate", content);
         var result = response.Content.ReadAsStringAsync().Result;
         var body = MongoHelper.FromJson<HttpCommonResponse>(result);
         return body.Error == ErrorCode.ERR_Success;
@@ -113,7 +112,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         BattleFormationProto proto = await CopyFormation(input);
         string requestBody = MongoHelper.ToJson(proto);
         HttpContent content = new StringContent(requestBody);//UTF8
-        var response = await client.PostAsync("/admin/pool_battle_formation/addOrUpdate", content);
+        var response = await client.PostAsync("/manage/pool_battle_formation/addOrUpdate", content);
         var result = response.Content.ReadAsStringAsync().Result;
         var body = MongoHelper.FromJson<HttpCommonResponse>(result);
         return body.Error == ErrorCode.ERR_Success;
@@ -126,11 +125,11 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     /// <returns></returns>
     [HttpGet]
     [ApiDescriptionSettings(Name = "Detail")]
-    public async Task<GameFormationBase> Get([FromQuery] QueryByIdGameFormationBaseInput input)
+    public async Task<GameFormationBaseOutput> Get([FromQuery] QueryByIdGameFormationBaseInput input)
     {
         GameFormationBaseOutput detail = new GameFormationBaseOutput();
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-        var response = await client.GetAsync("/admin/pool_battle_formation/detail?id="+input.Id);
+        var response = await client.GetAsync("/manage/pool_battle_formation/detail?id="+input.Id);
         var result = response.Content.ReadAsStringAsync().Result;
         var body = MongoHelper.FromJson<HttpGetPoolFormationResponse>(result);
         if (body.Error == ErrorCode.ERR_Success)
@@ -155,7 +154,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         }
         long start = DateTime.Now.Millisecond;
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-        var response = await client.PostAsync("/admin/pool_battle_formation/merge_online?playerIds="+input.ToMergePlayerUnitIds, null);
+        var response = await client.PostAsync("/manage/pool_battle_formation/merge_online?playerIds="+input.ToMergePlayerUnitIds, null);
         var result = response.Content.ReadAsStringAsync().Result;
         var body = MongoHelper.FromJson<HttpCommonResponse>(result);
         Log.Information($"merge formation span {DateTime.Now.Millisecond - start} ms, {body.Message}");
@@ -173,7 +172,24 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
     {
         List<GameFormationBaseOutput> list = new List<GameFormationBaseOutput>();
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-        var response = await client.GetAsync("/admin/pool_battle_formation/list?roundId="+input.RoundId+"&rank="+input.Rank+"&careerConfigId="+input.CareerConfigId+"&careerSkinConfigId="+input.CareerSkinConfigId);
+        string uri = "/manage/pool_battle_formation/list?";
+        if (input.RoundId != 0)
+        {
+            uri += "roundId="+input.RoundId + "&";
+        }
+        if (input.Rank != -1)
+        {
+            uri += "rank="+input.Rank + "&";
+        }
+        if (input.CareerConfigId != 0)
+        {
+            uri += "careerConfigId="+input.CareerConfigId + "&";
+        }
+        if (input.CareerSkinConfigId != 0)
+        {
+            uri += "careerSkinConfigId="+input.CareerSkinConfigId + "&";
+        }
+        var response = await client.GetAsync(uri);
         var result = response.Content.ReadAsStringAsync().Result;
         var body = MongoHelper.FromJson<HttpGetPoolFormationsResponse>(result);
         if (body.Error == ErrorCode.ERR_Success)
@@ -252,6 +268,7 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         to.CanComposite = from.CanComposite;
         to.CreateTime = from.CreateTime;
         to.UpdateTime = from.UpdateTime;
+        to.UpdateUserId = from.UpdateUserId;
         to.IsDeleted = from.IsDeleted;
         to.DifficultyLevel = (int)from.DifficultyLevelEnum;
         to.Remark = from.Remark;
@@ -264,12 +281,6 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         
         CopyItems(from.ItemLayerItems, out List<ItemProto> gameItemLayerItemEntities);
         to.ItemLayerItemProtos = gameItemLayerItemEntities;
-    }
-
-    private static string ShowAppendDate(long ms)
-    {
-        var create = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(ms);
-        return create.ToString("yyyyMMdd HH:mm:ss");
     }
     /// <summary>
     /// 
@@ -299,9 +310,10 @@ public class GameFormationBaseService : IDynamicApiController, ITransient
         to.RoundId = from.RoundId;
         to.CanComposite = from.CanComposite;
         to.CreateTime = from.CreateTime;
-        to.S_CreateTime = ShowAppendDate(from.CreateTime);
+        to.S_CreateTime = DateUtil.ShowAppendDate(from.CreateTime);
         to.UpdateTime = from.UpdateTime;
-        to.S_UpdateTime = ShowAppendDate(from.UpdateTime);
+        to.UpdateUserId = from.UpdateUserId;
+        to.S_UpdateTime = DateUtil.ShowAppendDate(from.UpdateTime);
         to.IsDeleted = from.IsDeleted;
         to.DifficultyLevelEnum = (DifficultyLevelEnum)from.DifficultyLevel;
         to.Remark = from.Remark;

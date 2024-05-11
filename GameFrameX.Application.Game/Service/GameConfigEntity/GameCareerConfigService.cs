@@ -12,7 +12,7 @@ namespace GameFrameX.Application.Game;
 public class GameCareerConfigService : IDynamicApiController, ITransient
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private static Dictionary<int, CareerConfig> _careerConfigDictionary;
+    private static Dictionary<int, CareerConfig>? _careerConfigDictionary;
 
     /// <summary>
     /// 
@@ -24,12 +24,22 @@ public class GameCareerConfigService : IDynamicApiController, ITransient
     }
 
 
+
     /// <summary>
     /// 
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    [ApiDescriptionSettings(Name = "Init")]
+    [ApiDescriptionSettings(Name = "List")]
+    public async Task<List<CareerConfig>?> List()
+    {
+        return _careerConfigDictionary?.Values?.ToList();
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public async Task<Dictionary<int, CareerConfig>> Init()
     {
         if (!_careerConfigDictionary.IsNullOrEmpty())
@@ -40,7 +50,7 @@ public class GameCareerConfigService : IDynamicApiController, ITransient
         try
         {
             var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-            var response = await client.GetAsync("/admin/config/career");
+            var response = await client.GetAsync("/manage/config/career");
             var result = MongoHelper.FromJson<HttpCommonResponse>(response.Content.ReadAsStringAsync().Result);
             if (result.Error == ErrorCode.ERR_Success)
             {

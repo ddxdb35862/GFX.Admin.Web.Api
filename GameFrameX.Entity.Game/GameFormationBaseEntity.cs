@@ -125,6 +125,12 @@ public class GameFormationBase : EntityBaseSelect
     public long UpdateTime { get; set; }
     
     /// <summary>
+    /// 更新用户
+    /// </summary>
+    [SugarColumn(ColumnDescription = "更新用户ID")]
+    public long UpdateUserId { get; set; }
+    
+    /// <summary>
     /// 备注
     /// </summary>
     [SugarColumn(ColumnDescription = "备注")]

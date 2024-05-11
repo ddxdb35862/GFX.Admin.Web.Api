@@ -1256,10 +1256,10 @@ namespace ET
 		public bool CanComposite { get; set; }
 
 		[MemoryPackOrder(9)]
-		public string? PlayerName { get; set; }
+		public string PlayerName { get; set; }
 
 		[MemoryPackOrder(10)]
-		public string? PlayerIcon { get; set; }
+		public string PlayerIcon { get; set; }
 
 		[MemoryPackOrder(11)]
 		public List<ItemProto> CareerItemProtos { get; set; } = new();
@@ -1280,7 +1280,7 @@ namespace ET
 		public int IsDeleted { get; set; }
 
 		[MemoryPackOrder(17)]
-		public string? Remark { get; set; }
+		public string Remark { get; set; }
 
 		public override void Dispose() 
 		{
@@ -4160,6 +4160,69 @@ namespace ET
 
 //////////////////////////////////
 //HTTP
+//指定匹配的规则的阵容关系
+	[Message(OuterMessage.AdventureMatchAOProto)]
+	[MemoryPackable]
+	public partial class AdventureMatchAOProto: MessageObject
+	{
+		public static AdventureMatchAOProto Create(bool isFromPool = true) 
+		{ 
+			return ObjectPool.Instance.Fetch(typeof(AdventureMatchAOProto), isFromPool) as AdventureMatchAOProto; 
+		}
+
+		[MemoryPackOrder(0)]
+		public long Id { get; set; }
+
+		[MemoryPackOrder(1)]
+		public int AdventureMode { get; set; }
+
+		[MemoryPackOrder(2)]
+		public int AdventureTime { get; set; }
+
+		[MemoryPackOrder(3)]
+		public int RoundId { get; set; }
+
+		[MemoryPackOrder(4)]
+		public long FormationId { get; set; }
+
+		[MemoryPackOrder(5)]
+		public string? FormationRemark { get; set; }
+
+		[MemoryPackOrder(6)]
+		public string? Remark { get; set; }
+
+		[MemoryPackOrder(13)]
+		public long CreateTime { get; set; }
+
+		[MemoryPackOrder(14)]
+		public long UpdateTime { get; set; }
+
+		[MemoryPackOrder(15)]
+		public long UpdateUserId { get; set; }
+
+		[MemoryPackOrder(16)]
+		public int IsDeleted { get; set; }
+
+		public override void Dispose() 
+		{
+			if (!this.IsFromPool) return;
+			this.Id = default;
+			this.AdventureMode = default;
+			this.AdventureTime = default;
+			this.RoundId = default;
+			this.FormationId = default;
+			this.FormationRemark = default;
+			this.Remark = default;
+			this.CreateTime = default;
+			this.UpdateTime = default;
+			this.UpdateUserId = default;
+			this.IsDeleted = default;
+			
+			ObjectPool.Instance.Recycle(this); 
+		}
+
+	}
+
 //通用返回
 	[Message(OuterMessage.HttpCommonResponse)]
 	[MemoryPackable]
@@ -4247,6 +4310,66 @@ namespace ET
 			this.Error = default;
 			this.Message = default;
 			this.BattleFormationProto = default;
+			
+			ObjectPool.Instance.Recycle(this); 
+		}
+
+	}
+
+	[Message(OuterMessage.HttpGetAdventureMatchAOsResponse)]
+	[MemoryPackable]
+	public partial class HttpGetAdventureMatchAOsResponse: MessageObject
+	{
+		public static HttpGetAdventureMatchAOsResponse Create(bool isFromPool = true) 
+		{ 
+			return ObjectPool.Instance.Fetch(typeof(HttpGetAdventureMatchAOsResponse), isFromPool) as HttpGetAdventureMatchAOsResponse; 
+		}
+
+		[MemoryPackOrder(0)]
+		public int Error { get; set; }
+
+		[MemoryPackOrder(1)]
+		public string Message { get; set; }
+
+		[MemoryPackOrder(2)]
+		public List<AdventureMatchAOProto> AdventureMatchAOProtos { get; set; } = new();
+
+		public override void Dispose() 
+		{
+			if (!this.IsFromPool) return;
+			this.Error = default;
+			this.Message = default;
+			this.AdventureMatchAOProtos.Clear();
+			
+			ObjectPool.Instance.Recycle(this); 
+		}
+
+	}
+
+	[Message(OuterMessage.HttpGetAdventureMatchAOResponse)]
+	[MemoryPackable]
+	public partial class HttpGetAdventureMatchAOResponse: MessageObject
+	{
+		public static HttpGetAdventureMatchAOResponse Create(bool isFromPool = true) 
+		{ 
+			return ObjectPool.Instance.Fetch(typeof(HttpGetAdventureMatchAOResponse), isFromPool) as HttpGetAdventureMatchAOResponse; 
+		}
+
+		[MemoryPackOrder(0)]
+		public int Error { get; set; }
+
+		[MemoryPackOrder(1)]
+		public string Message { get; set; }
+
+		[MemoryPackOrder(2)]
+		public AdventureMatchAOProto AdventureMatchAOProto { get; set; }
+
+		public override void Dispose() 
+		{
+			if (!this.IsFromPool) return;
+			this.Error = default;
+			this.Message = default;
+			this.AdventureMatchAOProto = default;
 			
 			ObjectPool.Instance.Recycle(this); 
 		}
@@ -4388,8 +4511,11 @@ namespace ET
 		 public const ushort M2C_ReceiveActivityReward = 10130;
 		 public const ushort C2M_RequestRewards = 10131;
 		 public const ushort M2C_RequestRewards = 10132;
-		 public const ushort HttpCommonResponse = 10133;
-		 public const ushort HttpGetPoolFormationsResponse = 10134;
-		 public const ushort HttpGetPoolFormationResponse = 10135;
+		 public const ushort AdventureMatchAOProto = 10133;
+		 public const ushort HttpCommonResponse = 10134;
+		 public const ushort HttpGetPoolFormationsResponse = 10135;
+		 public const ushort HttpGetPoolFormationResponse = 10136;
+		 public const ushort HttpGetAdventureMatchAOsResponse = 10137;
+		 public const ushort HttpGetAdventureMatchAOResponse = 10138;
 	}
 }

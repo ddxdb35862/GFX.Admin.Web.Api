@@ -12,7 +12,7 @@ namespace GameFrameX.Application.Game;
 public class GameItemTransformConfigService : IDynamicApiController, ITransient
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private static Dictionary<int, ItemTransformConfig?> _itemTransformConfigDictionary;
+    private static Dictionary<int, ItemTransformConfig?>? _itemTransformConfigDictionary;
     
     public static Dictionary<int, List<ItemTransformConfig>?> _transformGroups = new ();
     public static Dictionary<(int, int), ItemTransformConfig?> _transformGroupMembers = new ();
@@ -25,12 +25,23 @@ public class GameItemTransformConfigService : IDynamicApiController, ITransient
         _httpClientFactory = httpClientFactory;
     }
 
+
+
     /// <summary>
     /// 
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    [ApiDescriptionSettings(Name = "Init")]
+    [ApiDescriptionSettings(Name = "List")]
+    public async Task<List<ItemTransformConfig>?> List()
+    {
+        return _itemTransformConfigDictionary?.Values?.ToList();
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public async Task<Dictionary<int, ItemTransformConfig>?> Init()
     {
         if (!_itemTransformConfigDictionary.IsNullOrEmpty())
@@ -40,7 +51,7 @@ public class GameItemTransformConfigService : IDynamicApiController, ITransient
         try
         {
             var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-            var response = await client.GetAsync("/admin/config/itemTransform");
+            var response = await client.GetAsync("/manage/config/itemTransform");
             var result = MongoHelper.FromJson<HttpCommonResponse>(response.Content.ReadAsStringAsync().Result);
             if (result.Error == ErrorCode.ERR_Success)
             { 

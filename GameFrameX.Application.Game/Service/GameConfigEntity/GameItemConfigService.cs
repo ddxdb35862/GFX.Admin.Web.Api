@@ -12,7 +12,7 @@ namespace GameFrameX.Application.Game;
 public class GameItemConfigService : IDynamicApiController, ITransient
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private static Dictionary<int, ItemConfig?> _itemConfigDictionary;
+    private static Dictionary<int, ItemConfig?>? _itemConfigDictionary;
     /// <summary>
     /// 
     /// </summary>
@@ -22,12 +22,23 @@ public class GameItemConfigService : IDynamicApiController, ITransient
         _httpClientFactory = httpClientFactory;
     }
 
+
     /// <summary>
     /// 
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    [ApiDescriptionSettings(Name = "Init")]
+    [ApiDescriptionSettings(Name = "List")]
+    public async Task<List<ItemConfig>?> List()
+    {
+        return _itemConfigDictionary?.Values?.ToList();
+    }
+
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public async Task<Dictionary<int, ItemConfig>?> Init()
     {
         if (!_itemConfigDictionary.IsNullOrEmpty())
@@ -37,7 +48,7 @@ public class GameItemConfigService : IDynamicApiController, ITransient
         try
         {
             var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-            var response = await client.GetAsync("/admin/config/item");
+            var response = await client.GetAsync("/manage/config/item");
             var result = MongoHelper.FromJson<HttpCommonResponse>(response.Content.ReadAsStringAsync().Result);
             if (result.Error == ErrorCode.ERR_Success)
             { 

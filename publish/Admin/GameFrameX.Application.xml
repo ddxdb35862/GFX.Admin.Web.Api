@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GameFrameX.Application</name>
+    </assembly>
+    <members>
+        <member name="T:GameFrameX.Application.Const.ApplicationConst">
+            <summary>
+            业务应用相关常量
+            </summary>
+        </member>
+        <member name="F:GameFrameX.Application.Const.ApplicationConst.GroupName">
+            <summary>
+            API分组名称
+            </summary>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.ClientAppVersionSeedData">
+            <summary>
+            客户端程序版本配置表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.ClientAppVersionSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.ClientChannelSeedData">
+            <summary>
+            客户端渠道配置表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.ClientChannelSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.ClientGlobalInfoSeedData">
+            <summary>
+            客户端全局信息配置表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.ClientGlobalInfoSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.ClientLanguageSeedData">
+            <summary>
+            客户端语言配置表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.ClientLanguageSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.ClientPackageSeedData">
+            <summary>
+            客户端包配置表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.ClientPackageSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.ClientPlatformSeedData">
+            <summary>
+            客户端平台配置表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.ClientPlatformSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.ClientVersionSeedData">
+            <summary>
+            客户端程序版本配置表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.ClientVersionSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysConfigSeedData">
+            <summary>
+            系统配置表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysConfigSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysDictDataSeedData">
+            <summary>
+            系统字典值表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysDictDataSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysDictTypeSeedData">
+            <summary>
+            系统字典类型表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysDictTypeSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysMenuSeedData">
+            <summary>
+            系统菜单表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysMenuSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysOrgSeedData">
+            <summary>
+            系统机构表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysOrgSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysPosSeedData">
+            <summary>
+            系统职位表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysPosSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysRoleMenuSeedData">
+            <summary>
+            系统角色菜单表 表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysRoleMenuSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysRoleSeedData">
+            <summary>
+            系统角色表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysRoleSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysTenantSeedData">
+            <summary>
+            系统租户表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysTenantSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysUserExtOrgSeedData">
+            <summary>
+            系统用户扩展机构表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysUserExtOrgSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysUserRoleSeedData">
+            <summary>
+            系统用户角色表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysUserRoleSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:GameFrameX.Application.SeedData.System.SysUserSeedData">
+            <summary>
+            系统用户表种子数据
+            </summary>
+        </member>
+        <member name="M:GameFrameX.Application.SeedData.System.SysUserSeedData.HasData">
+            <summary>
+            种子数据
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

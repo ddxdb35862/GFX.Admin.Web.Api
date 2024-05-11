@@ -32,7 +32,16 @@ public class GameCareerSkinConfigService : IDynamicApiController, ITransient
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    [ApiDescriptionSettings(Name = "Init")]
+    [ApiDescriptionSettings(Name = "List")]
+    public async Task<List<CareerSkinConfig>?> List()
+    {
+        return _careerSkinConfigDictionary?.Values?.ToList();
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     public async Task<Dictionary<int, CareerSkinConfig>?> Init()
     {
         if (!_careerSkinConfigDictionary.IsNullOrEmpty())
@@ -42,7 +51,7 @@ public class GameCareerSkinConfigService : IDynamicApiController, ITransient
         try
         {
             var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
-            var response = await client.GetAsync("/admin/config/careerSkin");
+            var response = await client.GetAsync("/manage/config/careerSkin");
             var result = MongoHelper.FromJson<HttpCommonResponse>(response.Content.ReadAsStringAsync().Result);
             if (result.Error == ErrorCode.ERR_Success)
             { 

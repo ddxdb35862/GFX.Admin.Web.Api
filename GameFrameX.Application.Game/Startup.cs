@@ -26,6 +26,7 @@ public class Startup : AppStartup
         var gameServerOptions = App.GetConfig<GameServerOptions>("GameServerSettings", true);
         
         var gameServerHostPort = Environment.GetEnvironmentVariable("GAME_SERVER_HOST_PORT");
+        Log.Information($"HttpRootUrl0:{gameServerHostPort}");
         if (!string.IsNullOrEmpty(gameServerHostPort))
         {
             gameServerOptions.HttpRootUrl = $"http://{gameServerHostPort}";

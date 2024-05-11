@@ -24,7 +24,7 @@
     "LogError": false // 是否输出异常日志
   },
   "GameServerSettings": {
-    "HttpRootUrl": "http://localhost:30901" // 游戏服务器的HTTP请求根地址
+    "HttpRootUrl": "http://127.0.0.1:30901" // 游戏服务器的HTTP请求根地址
   },
   "LocalizationSettings": {
     "SupportedCultures": [ "zh-CN", "en" ], // 语言列表
