@@ -139,15 +139,12 @@ public class GameFormationAdventureMatchAOService : IDynamicApiController, ITran
         List<GameFormationAdventureMatchAOOutput> list = new List<GameFormationAdventureMatchAOOutput>();
         var client = _httpClientFactory.CreateClient(GameConst.GameRequestHttpGroupName);
         string uri = "/manage/adventure/matchOA/list?";
-        if (input.RoundId != 0)
+        if (input.RoundId == 0)
         {
             uri += "roundId="+input.RoundId + "&";
         }
-        if (input.AdventureMode != -1)
-        {
-            uri += "adventureMode="+input.AdventureMode + "&";
-        }
-        if (input.AdventureTime != 0)
+        uri += "adventureMode="+input.AdventureMode + "&";
+        if (input.AdventureTime == 0)
         {
             uri += "adventureTime="+input.AdventureTime + "&";
         }
@@ -191,10 +188,11 @@ public class GameFormationAdventureMatchAOService : IDynamicApiController, ITran
     {
         to = new GameFormationAdventureMatchAOOutput();
         to.Id = from.Id;
-        to.RoundId = from.RoundId;
-        to.AdventureMode = from.AdventureMode;
-        to.AdventureMode = from.AdventureMode;
+        to.RoundId = (GameRound)from.RoundId;
+        to.AdventureMode = (GameAdventureMode)from.AdventureMode;
+        to.AdventureTime = from.AdventureTime;
         to.FormationRemark = from.FormationRemark;
+        to.S_FormationId = from.FormationId.ToString();
         
         to.CreateTime = from.CreateTime;
         to.UpdateTime = from.UpdateTime;
@@ -217,10 +215,10 @@ public class GameFormationAdventureMatchAOService : IDynamicApiController, ITran
         
         AdventureMatchAOProto to = new AdventureMatchAOProto();
         to.Id = id;
-        to.RoundId = updateInput.RoundId;
-        to.AdventureMode = updateInput.AdventureMode;
+        to.RoundId = (int)updateInput.RoundId;
+        to.AdventureMode = (int)updateInput.AdventureMode;
         to.AdventureTime = updateInput.AdventureTime;
-        to.FormationRemark = updateInput.FormationRemark;
+        to.FormationId = long.Parse(updateInput.S_FormationId);
         
         to.CreateTime = updateInput.CreateTime;
         to.UpdateTime = updateInput.UpdateTime;
@@ -237,10 +235,10 @@ public class GameFormationAdventureMatchAOService : IDynamicApiController, ITran
     private AdventureMatchAOProto CopyFormation(AddGameFormationAdventureMatchAOInput addInput)
     {
         AdventureMatchAOProto to = new AdventureMatchAOProto();
-        to.RoundId = addInput.RoundId;
-        to.AdventureMode = addInput.AdventureMode;
+        to.RoundId = (int)addInput.RoundId;
+        to.AdventureMode = (int)addInput.AdventureMode;
         to.AdventureTime = addInput.AdventureTime;
-        to.FormationRemark = addInput.FormationRemark;
+        to.FormationId = long.Parse(addInput.S_FormationId);
         
         to.CreateTime = DateUtil.ServerNow();
         to.UpdateTime = DateUtil.ServerNow();
@@ -260,10 +258,11 @@ public class GameFormationAdventureMatchAOService : IDynamicApiController, ITran
         
         AdventureMatchAOProto to = new AdventureMatchAOProto();
         to.Id = id;
-        to.RoundId = updateInput.RoundId;
-        to.AdventureMode = updateInput.AdventureMode;
+        to.RoundId = (int)updateInput.RoundId;
+        to.AdventureMode = (int)updateInput.AdventureMode;
         to.AdventureTime = updateInput.AdventureTime;
         to.FormationRemark = updateInput.FormationRemark;
+        to.FormationId = long.Parse(updateInput.S_FormationId);
         
         to.CreateTime = updateInput.CreateTime;
         to.UpdateTime = updateInput.UpdateTime;

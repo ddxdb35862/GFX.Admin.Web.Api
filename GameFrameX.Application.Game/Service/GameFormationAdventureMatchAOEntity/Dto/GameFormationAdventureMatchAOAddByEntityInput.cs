@@ -9,21 +9,19 @@ public class AddGameFormationAdventureMatchAOInput : BaseAddInput
     /// <summary>
     /// 轮次，在一次闯关中
     /// </summary>
-    public int RoundId { get; set; }
+    public GameRound RoundId { get; set; }
     /// <summary>
     /// 模式
     /// </summary>
-    public int AdventureMode { get; set; }
+    public GameAdventureMode AdventureMode { get; set; }
     /// <summary>
     /// 模式
     /// </summary>
     public int AdventureTime { get; set; }
-    
     /// <summary>
-    /// 阵容备注
+    /// 阵容
     /// </summary>
-    public string? FormationRemark { get; set; }
-    
+    //public long FormationId { get; set; }
     #endregion
     
     #region 扩展属性
@@ -35,23 +33,26 @@ public class AddGameFormationAdventureMatchAOInput : BaseAddInput
     /// 创建时间
     /// </summary>
     public long CreateTime { get; set; }
-    
     /// <summary>
     /// 更新时间
     /// </summary>
     public long UpdateTime { get; set; }
-    
     /// <summary>
     /// 更新用户
     /// </summary
     public long UpdateUserId { get; set; }
-    
     /// <summary>
     /// 备注
     /// </summary>
     public string? Remark { get; set; }
     
+    /// <summary>
+    /// 阵容stringID
+    /// </summary>
+    public string S_FormationId { get; set; }
     #endregion
+    
+    
 
 }
 

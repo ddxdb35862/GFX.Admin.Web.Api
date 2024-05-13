@@ -24,12 +24,12 @@ public class GameFormationAdventureMatchAO : EntityBaseSelect
     /// 轮次，在一次闯关中
     /// </summary>
     [SugarColumn(ColumnDescription = "第几轮")]
-    public int RoundId { get; set; }
+    public GameRound RoundId { get; set; }
     /// <summary>
     /// 模式
     /// </summary>
     [SugarColumn(ColumnDescription = "模式")]
-    public int AdventureMode { get; set; }
+    public GameAdventureMode AdventureMode { get; set; }
     /// <summary>
     /// 模式
     /// </summary>
@@ -41,6 +41,12 @@ public class GameFormationAdventureMatchAO : EntityBaseSelect
     /// </summary>
     [SugarColumn(ColumnDescription = "阵容备注")]
     public string? FormationRemark { get; set; }
+    
+    /// <summary>
+    /// 阵容id
+    /// </summary>
+    //[SugarColumn(ColumnDescription = "阵容id")]
+    //public long FormationId { get; set; }
     
     #endregion
     
@@ -89,5 +95,10 @@ public class GameFormationAdventureMatchAO : EntityBaseSelect
     /// 
     /// </summary>
     public string S_Id { get; set; }
+    
+    /// <summary>
+    /// 阵容stringID
+    /// </summary>
+    public string S_FormationId { get; set; }
     #endregion
 }

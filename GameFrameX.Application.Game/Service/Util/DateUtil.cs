@@ -12,14 +12,14 @@ public static partial class DateUtil
     /// <returns></returns>
     public static string ShowAppendDate(long ms)
     {
-        var create = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(ms);
+        var create = new DateTime(1970, 1, 1, 8, 0, 0, DateTimeKind.Utc).AddMilliseconds(ms);
         return create.ToString("yyyyMMdd HH:mm:ss");
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private static readonly DateTime Dt1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly DateTime Dt1970 = new DateTime(1970, 1, 1, 8, 0, 0, DateTimeKind.Utc);
     
     /// <summary>
     /// 当前时间
